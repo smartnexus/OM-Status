@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent">
+    <TextView android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:text="Servicio de comprobación de OrchestraManager"/>
+
+    <Button
+        android:id="@+id/boton_arrancar"
+        android:layout_width="match_parent"
+        android:layout_height="124dp"
+        android:text="Arrancar servicio" />
+
+    <Button
+        android:id="@+id/boton_detener"
+        android:layout_width="match_parent"
+        android:layout_height="139dp"
+        android:text="Detener servicio" />
+</LinearLayout>
