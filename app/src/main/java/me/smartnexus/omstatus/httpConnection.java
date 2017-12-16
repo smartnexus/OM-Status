@@ -45,10 +45,13 @@ public class httpConnection extends Service {
             public void run() {
                 try {
                     while(true) {
-                        if (!checkConnection() && !alerted) {
-                            alert();
+                        if(!alerted) {
+                            if (!checkConnection()) {
+                                alert();
+                            } else {
+                                alerted = false;
+                            }
                         }
-                        alerted = false;
                         sleep(5000);
                         handler.post(this);
                     }
