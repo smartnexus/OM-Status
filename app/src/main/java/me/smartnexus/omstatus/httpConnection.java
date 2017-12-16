@@ -21,7 +21,7 @@ import java.net.URL;
 public class httpConnection extends Service {
 
     Handler handler = new Handler();
-    boolean checking = true;
+    boolean alerted = false;
     NotificationManager nm;
 
     @Override
@@ -39,14 +39,16 @@ public class httpConnection extends Service {
 
     @Override
     public int onStartCommand(Intent intenc, int flags, int idArranque) {
+        Toast.makeText(this,"Servicio en funcionamiento "+ idArranque, Toast.LENGTH_SHORT).show();
         Thread thread = new Thread() {
             @Override
             public void run() {
                 try {
                     while(true) {
-                        if (!checkConnection()) {
+                        if (!checkConnection() && !alerted) {
                             alert();
                         }
+                        alerted = false;
                         sleep(5000);
                         handler.post(this);
                     }
@@ -55,16 +57,14 @@ public class httpConnection extends Service {
                 }
             }
         };
-
         thread.start();
-
-        Toast.makeText(this,"Servicio en funcionamiento "+ idArranque, Toast.LENGTH_SHORT).show();
         return START_STICKY;
     }
 
     @Override
     public void onDestroy() {
         Toast.makeText(this,"Servicio detenido", Toast.LENGTH_SHORT).show();
+        alerted = false;
     }
 
     @Override
@@ -99,6 +99,6 @@ public class httpConnection extends Service {
     public void alert() {
         NotificationCompat.Builder nb = new NotificationCompat.Builder(this,"me.smartnexus.omstatus.ANDROID").setSmallIcon(R.drawable.ic_launcher_background).setContentTitle("Orquesta Manager is Down!").setContentText("Something is wrong with the application");
         nm.notify(1, nb.build());
-        checking = false;
+        alerted = true;
     }
 }
