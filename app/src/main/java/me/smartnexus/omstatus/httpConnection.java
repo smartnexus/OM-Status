@@ -32,7 +32,7 @@ public class httpConnection extends Service {
         NotificationChannel channel = new NotificationChannel("me.smartnexus.omstatus.ANDROID", "ANDROID CHANNEL", NotificationManager.IMPORTANCE_HIGH);
         channel.enableLights(true);
         channel.enableVibration(true);
-        channel.setLightColor(Color.GREEN);
+        channel.setLightColor(Color.RED);
 
         nm.createNotificationChannel(channel);
     }
@@ -97,7 +97,7 @@ public class httpConnection extends Service {
     }
 
     public void alert() {
-        NotificationCompat.Builder nb = new NotificationCompat.Builder(this,"me.smartnexus.omstatus.ANDROID").setSmallIcon(R.drawable.ic_launcher_background).setContentTitle("Orquesta Manager is Down!").setContentText("Something is wrong with the application");
+        NotificationCompat.Builder nb = new NotificationCompat.Builder(this,"me.smartnexus.omstatus.ANDROID").setSmallIcon(R.drawable.ic_import_export_black_24dp).setContentTitle("Orquesta Manager is Down!").setContentText("Something is wrong with the application");
         nm.notify(1, nb.build());
         alerted = true;
     }
