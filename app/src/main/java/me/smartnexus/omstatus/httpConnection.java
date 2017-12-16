@@ -1,5 +1,6 @@
 package me.smartnexus.omstatus;
 
+import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.Service;
@@ -8,6 +9,7 @@ import android.content.Intent;
 import android.graphics.Color;
 import android.os.Handler;
 import android.os.IBinder;
+import android.support.v4.app.NotificationCompat;
 import android.widget.Toast;
 
 import java.io.BufferedReader;
@@ -15,47 +17,39 @@ import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
 
+import static me.smartnexus.omstatus.NotificationUtils.ANDROID_CHANNEL_ID;
+
 public class httpConnection extends Service {
 
-    Handler handler = new Handler();
-    Runnable check;
+    boolean checking = true;
+    NotificationManager nm;
 
     @Override
     public void onCreate() {
-        Toast.makeText(this,"Servicio iniciado", Toast.LENGTH_SHORT).show();
-        check = new Runnable() {
-            @Override
-            public void run() {
-                if(!checkConnection()) {
-                    NotificationManager mNotificationManager =
-                            (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
-                    String id = "my_channel_01";
-                    CharSequence name = "Orchesta Manager is Down!";
-                    String description = "Something is going wrong with de application";
-                    int importance = NotificationManager.IMPORTANCE_HIGH;
-                    NotificationChannel mChannel = new NotificationChannel(id, name, importance);
-                    mChannel.setDescription(description);
-                    mChannel.enableLights(true);
-                    mChannel.setLightColor(Color.RED);
-                    mChannel.enableVibration(true);
-                    mChannel.setVibrationPattern(new long[]{100, 200, 300, 400, 500, 400, 300, 200, 400});
-                    mNotificationManager.createNotificationChannel(mChannel);
-                }
-            }
-        };
+        nm = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+        NotificationChannel channel = new NotificationChannel("me.smartnexus.omstatus.ANDROID", "ANDROID CHANNEL", NotificationManager.IMPORTANCE_HIGH);
+        channel.enableLights(true);
+        channel.enableVibration(true);
+        channel.setLightColor(Color.GREEN);
+
+        nm.createNotificationChannel(channel);
     }
 
     @Override
     public int onStartCommand(Intent intenc, int flags, int idArranque) {
+        while (checking) {
+            if (checkConnection()) {
+                alert();
+            }
+        }
+
         Toast.makeText(this,"Servicio en funcionamiento "+ idArranque, Toast.LENGTH_SHORT).show();
-        handler.postDelayed(check, 5000);
         return START_STICKY;
     }
 
     @Override
     public void onDestroy() {
         Toast.makeText(this,"Servicio detenido", Toast.LENGTH_SHORT).show();
-        handler.removeCallbacks(check);
     }
 
     @Override
@@ -87,4 +81,9 @@ public class httpConnection extends Service {
         return result.toString().equals("true");
     }
 
+    public void alert() {
+        NotificationCompat.Builder nb = new NotificationCompat.Builder(this,"me.smartnexus.omstatus.ANDROID").setSmallIcon(R.drawable.ic_launcher_background).setContentTitle("Orquesta Manager is Down!").setContentText("Something is wrong with the application");
+        nm.notify(1, nb.build());
+        checking = false;
+    }
 }
