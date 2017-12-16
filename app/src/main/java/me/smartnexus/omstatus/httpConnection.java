@@ -1,6 +1,5 @@
 package me.smartnexus.omstatus;
 
-import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.Service;
@@ -9,23 +8,26 @@ import android.content.Intent;
 import android.graphics.Color;
 import android.os.Handler;
 import android.os.IBinder;
+import android.os.StrictMode;
 import android.support.v4.app.NotificationCompat;
 import android.widget.Toast;
-
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
 
-import static me.smartnexus.omstatus.NotificationUtils.ANDROID_CHANNEL_ID;
+
 
 public class httpConnection extends Service {
 
+    Handler handler = new Handler();
     boolean checking = true;
     NotificationManager nm;
 
     @Override
     public void onCreate() {
+        StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
+        StrictMode.setThreadPolicy(policy);
         nm = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
         NotificationChannel channel = new NotificationChannel("me.smartnexus.omstatus.ANDROID", "ANDROID CHANNEL", NotificationManager.IMPORTANCE_HIGH);
         channel.enableLights(true);
@@ -37,11 +39,24 @@ public class httpConnection extends Service {
 
     @Override
     public int onStartCommand(Intent intenc, int flags, int idArranque) {
-        while (checking) {
-            if (checkConnection()) {
-                alert();
+        Thread thread = new Thread() {
+            @Override
+            public void run() {
+                try {
+                    while(true) {
+                        if (!checkConnection()) {
+                            alert();
+                        }
+                        sleep(5000);
+                        handler.post(this);
+                    }
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
             }
-        }
+        };
+
+        thread.start();
 
         Toast.makeText(this,"Servicio en funcionamiento "+ idArranque, Toast.LENGTH_SHORT).show();
         return START_STICKY;
@@ -72,11 +87,11 @@ public class httpConnection extends Service {
             }
             rd.close();
         } catch (Exception e) {
+            e.printStackTrace();
             return false;
         }
 
-        Toast.makeText(this,"Comprobando conexión...",
-                Toast.LENGTH_SHORT).show();
+
 
         return result.toString().equals("true");
     }
